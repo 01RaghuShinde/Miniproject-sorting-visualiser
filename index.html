@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Animated Array Swap on Canvas</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    #input-array {
+      width: 300px;
+      padding: 10px;
+      margin: 10px 0;
+    }
+
+    #arrayCanvas {
+      border: 1px solid #000;
+      margin-top: 20px;
+    }
+
+    label {
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <label for="input-array">Enter array elements (comma-separated):</label>
+  <input type="text" id="input-array" placeholder="e.g., 2, 4, 8, 12, 16, 18">
+  <button onclick="drawArray()">Draw Array</button>
+  <button onclick="swapAndAnimate(3, array.length - 1)">Swap Position 3 with Last Element</button>
+
+  <canvas id="arrayCanvas" width="500" height="150"></canvas>
+
+  <script>
+    let array = [];  // Store the array globally for access across functions
+
+    function drawArray() {
+      const input = document.getElementById('input-array').value;
+      array = input.split(',').map(Number); // Store as a global array
+
+      // Draw array on canvas
+      drawArrayOnCanvas();
+    }
+
+    function drawArrayOnCanvas() {
+      const canvas = document.getElementById('arrayCanvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Define basic box dimensions and positions
+      const boxWidth = 50;
+      const boxHeight = 50;
+      const boxSpacing = 10;
+      const startX = 20;
+      const startY = 50;
+
+      array.forEach((num, index) => {
+        const x = startX + index * (boxWidth + boxSpacing);
+
+        // Draw the rectangle (box)
+        ctx.fillStyle = '#e6f4e8'; // Box color
+        ctx.fillRect(x, startY, boxWidth, boxHeight);
+        ctx.strokeStyle = '#000';
+        ctx.strokeRect(x, startY, boxWidth, boxHeight);
+
+        // Draw the number inside the box
+        ctx.fillStyle = '#000';
+        ctx.font = '16px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(num, x + boxWidth / 2, startY + boxHeight / 2);
+
+        // Draw the index below the box
+        ctx.fillText(index, x + boxWidth / 2, startY + boxHeight + 20);
+      });
+    }
+
+    function swapAndAnimate(pos1, pos2) {
+      const canvas = document.getElementById('arrayCanvas');
+      const ctx = canvas.getContext('2d');
+
+      // Coordinates for elements to be swapped
+      const boxWidth = 50;
+      const boxSpacing = 10;
+      const startX = 20;
+      const startY = 50;
+      const x1 = startX + pos1 * (boxWidth + boxSpacing);
+      const x2 = startX + pos2 * (boxWidth + boxSpacing);
+
+      // Animation settings
+      let progress = 0;  // Tracks animation progress
+
+      function animateSwap() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawArrayOnCanvas();  // Draws all unchanged boxes
+
+        // Calculate the new X position for each box based on progress
+        const newX1 = x1 + (x2 - x1) * progress;
+        const newX2 = x2 - (x2 - x1) * progress;
+
+        // Draw the first box moving to the new position
+        drawBox(ctx, newX1, startY, array[pos1]);
+        // Draw the second box moving to the new position
+        drawBox(ctx, newX2, startY, array[pos2]);
+
+        // Increase progress
+        progress += 0.02;
+
+        // Check if animation should continue or end
+        if (progress < 1) {
+          requestAnimationFrame(animateSwap);  // Continue the animation
+        } else {
+          // Swap elements in the array and redraw
+          const temp = array[pos1];
+          array[pos1] = array[pos2];
+          array[pos2] = temp;
+          drawArrayOnCanvas();  // Redraw the final positions after swapping
+        }
+      }
+
+      requestAnimationFrame(animateSwap);  // Start the animation
+    }
+
+    function drawBox(ctx, x, y, num) {
+      const boxWidth = 50;
+      const boxHeight = 50;
+
+      // Draw the rectangle (box)
+      ctx.fillStyle = '#e6f4e8';  // Box color
+      ctx.fillRect(x, y, boxWidth, boxHeight);
+      ctx.strokeStyle = '#000';
+      ctx.strokeRect(x, y, boxWidth, boxHeight);
+
+      // Draw the number inside the box
+      ctx.fillStyle = '#000';
+      ctx.font = '16px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(num, x + boxWidth / 2, y + boxHeight / 2);
+    }
+  </script>
+</body>
+</html>
